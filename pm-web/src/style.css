@@ -154,6 +154,7 @@ body {
 .items-list-container {
   flex-grow: 1;
   overflow-y: auto;
+  overflow-x: auto;
   padding-right: 8px;
 }
 
@@ -505,3 +506,101 @@ form.hidden, p.hidden {
   display: none !important;
 }
 
+/* --- RESPONSIVE DESIGN (MOBILE & TABLET) --- */
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+    padding: 8px;
+    gap: 8px;
+    height: 100svh; /* Tương thích Safari tốt hơn */
+  }
+  
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .sidebar-header {
+    margin-bottom: 0;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .sidebar-header h2 {
+    font-size: 18px;
+  }
+  
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 4px;
+    flex-grow: 1;
+    padding-bottom: 4px;
+  }
+  
+  /* Ẩn thanh cuộn của sidebar nav trên mobile */
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+  
+  .sidebar-footer {
+    margin-top: 0;
+  }
+  
+  .nav-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  
+  .top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .search-container input {
+    width: 100%;
+  }
+  
+  .header-actions {
+    justify-content: space-between;
+  }
+  
+  .item-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .item-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .modal-content {
+    padding: 16px;
+    width: 100%;
+    margin: 10px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  /* Chống zoom khi focus input trên iOS */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  .radio-group-box {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .items-table {
+    font-size: 12px;
+  }
+}
