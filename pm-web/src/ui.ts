@@ -62,6 +62,15 @@ function setupEventListeners() {
         saveItem();
     });
 
+    document.getElementById('btn-clear-history')?.addEventListener('click', () => {
+        if (!editItemId) return;
+        if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử mật khẩu của mục này? Lịch sử sẽ không thể khôi phục.')) return;
+        
+        vaultManager.updateItem(editItemId, { passwordHistory: [] } as any);
+        document.getElementById('history-section')?.classList.add('hidden');
+        showToast('Đã xóa toàn bộ lịch sử mật khẩu!');
+    });
+
     document.getElementById('btn-add-sub-account')?.addEventListener('click', () => {
         addSubAccountRow();
     });
