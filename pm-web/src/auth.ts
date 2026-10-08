@@ -92,8 +92,8 @@ export function initAuthFlow(vaultManager: VaultManager) {
         });
     }
 
-    // Cần giữ lại data mẫu nếu user Claim Vault lần đầu
-    const initialMockVaultData = JSON.parse(JSON.stringify(vaultManager.getVault()));
+    // Lấy cấu trúc rỗng ban đầu để khởi tạo két mới
+    const initialEmptyVaultData = JSON.parse(JSON.stringify(vaultManager.getVault()));
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -202,8 +202,8 @@ export function initAuthFlow(vaultManager: VaultManager) {
             btnSetupSubmit.textContent = "Đang mã hóa & lưu lên Cloud...";
             btnSetupSubmit.disabled = true;
 
-            // Lưu dữ liệu mẫu vào két mới
-            const encryptedPayload = await encryptVault(JSON.stringify(initialMockVaultData), pwd, hint);
+            // Lưu dữ liệu rỗng vào két mới
+            const encryptedPayload = await encryptVault(JSON.stringify(initialEmptyVaultData), pwd, hint);
             await saveVaultData(vaultName, encryptedPayload);
             
             btnSetupSubmit.textContent = oldText;
