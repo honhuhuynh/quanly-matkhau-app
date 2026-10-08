@@ -124,12 +124,17 @@ function addSubAccountRow(sa?: SubAccount) {
     const div = document.createElement('div');
     div.className = 'sub-account-group';
     div.innerHTML = `
-        <input type="hidden" class="sa-id" value="${sa ? escapeHTML(sa.id) : ''}" />
-        <input type="text" placeholder="Tên (VD: Host)" class="sa-label" value="${sa ? escapeHTML(sa.label) : ''}" />
-        <input type="text" placeholder="Tài khoản" class="sa-username" value="${sa ? escapeHTML(sa.username) : ''}" />
-        <input type="password" placeholder="Mật khẩu" class="sa-password" value="${sa ? escapeHTML(sa.password) : ''}" />
-        <button type="button" class="icon-btn btn-toggle-sa-pwd" title="Hiện/Ẩn MK">👁</button>
-        <button type="button" class="icon-btn btn-del-sa" title="Xóa dòng này">🗑️</button>
+        <div style="display: flex; gap: 8px; align-items: center; width: 100%;">
+            <input type="hidden" class="sa-id" value="${sa ? escapeHTML(sa.id) : ''}" />
+            <input type="text" placeholder="Tên (VD: Host)" class="sa-label" value="${sa ? escapeHTML(sa.label) : ''}" />
+            <input type="text" placeholder="Tài khoản" class="sa-username" value="${sa ? escapeHTML(sa.username) : ''}" />
+            <input type="password" placeholder="Mật khẩu" class="sa-password" value="${sa ? escapeHTML(sa.password) : ''}" />
+            <button type="button" class="icon-btn btn-toggle-sa-pwd" title="Hiện/Ẩn MK">👁</button>
+            <button type="button" class="icon-btn btn-del-sa" title="Xóa dòng này">🗑️</button>
+        </div>
+        <div style="width: 100%; margin-top: 4px;">
+            <textarea placeholder="Ghi chú riêng / Mã dự phòng 2FA (nếu có)" class="sa-notes" rows="1" style="width: 100%; font-size: 11px; padding: 4px 8px; resize: vertical; min-height: 26px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary); border-radius: 4px;">${sa && sa.notes ? escapeHTML(sa.notes) : ''}</textarea>
+        </div>
     `;
     div.querySelector('.btn-toggle-sa-pwd')?.addEventListener('click', () => {
         const pwdInput = div.querySelector('.sa-password') as HTMLInputElement;
@@ -459,9 +464,10 @@ function saveItem() {
             const label = (group.querySelector('.sa-label') as HTMLInputElement).value;
             const saUser = (group.querySelector('.sa-username') as HTMLInputElement).value;
             const saPwd = (group.querySelector('.sa-password') as HTMLInputElement).value;
+            const saNotes = (group.querySelector('.sa-notes') as HTMLTextAreaElement).value;
             if (label) {
                 const oldSa = existingItem?.subAccounts?.find(s => s.id === saId);
-                subAccounts.push({ id: saId, label, username: saUser, password: saPwd, favorite: oldSa?.favorite || false });
+                subAccounts.push({ id: saId, label, username: saUser, password: saPwd, notes: saNotes, favorite: oldSa?.favorite || false });
             }
         });
     }

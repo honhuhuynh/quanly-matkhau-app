@@ -349,9 +349,11 @@ input:focus, textarea:focus {
 /* Sub-accounts Form */
 .sub-account-group {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  align-items: center;
+  flex-direction: column;
+  margin-bottom: 12px;
+  background: rgba(0,0,0,0.1);
+  padding: 8px;
+  border-radius: 6px;
 }
 .sub-account-group input {
   flex: 1;

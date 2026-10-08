@@ -12,6 +12,7 @@ export interface SubAccount {
     username: string;
     password: string;
     favorite?: boolean; // Starred individual accounts
+    notes?: string; // Ghi chú riêng cho tài khoản con (Vd: mã 2FA)
 }
 
 export interface PasswordHistoryEntry {
