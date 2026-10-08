@@ -109,7 +109,18 @@ export function initAuthFlow(vaultManager: VaultManager) {
         btnLoginSubmit.textContent = "Đang lấy dữ liệu...";
         btnLoginSubmit.disabled = true;
 
-        const savedData = await fetchVaultData(vaultName);
+        let savedData: string | null = null;
+        try {
+            savedData = await fetchVaultData(vaultName);
+        } catch (err: any) {
+            btnLoginSubmit.textContent = oldBtnText;
+            btnLoginSubmit.disabled = false;
+            if (loginError) {
+                loginError.textContent = err.message || "Lỗi lấy dữ liệu từ Cloud!";
+                loginError.classList.remove('hidden');
+            }
+            return;
+        }
 
         btnLoginSubmit.textContent = oldBtnText;
         btnLoginSubmit.disabled = false;
@@ -164,7 +175,17 @@ export function initAuthFlow(vaultManager: VaultManager) {
 
         // Có thể hàm này sẽ chạy chậm do chờ fetchVaultData, nhưng nó chỉ trigger khi user bấm "Gợi ý"
         btnForgot.textContent = "Đang tải...";
-        const savedData = await fetchVaultData(vaultName);
+        let savedData: string | null = null;
+        try {
+            savedData = await fetchVaultData(vaultName);
+        } catch (err: any) {
+            btnForgot.textContent = "(?) Gợi ý";
+            if (loginError) {
+                loginError.textContent = err.message || "Lỗi lấy dữ liệu từ Cloud!";
+                loginError.classList.remove('hidden');
+            }
+            return;
+        }
         btnForgot.textContent = "(?) Gợi ý";
         
         if (savedData) {
@@ -196,9 +217,9 @@ export function initAuthFlow(vaultManager: VaultManager) {
             return;
         }
 
+        const oldText = btnSetupSubmit.textContent;
         try {
             // Đổi text thành đang tạo
-            const oldText = btnSetupSubmit.textContent;
             btnSetupSubmit.textContent = "Đang mã hóa & lưu lên Cloud...";
             btnSetupSubmit.disabled = true;
 
@@ -216,8 +237,10 @@ export function initAuthFlow(vaultManager: VaultManager) {
             
             loginForm.dispatchEvent(new Event('submit'));
         } catch (err: any) {
+            btnSetupSubmit.textContent = oldText;
+            btnSetupSubmit.disabled = false;
             if (setupError) {
-                setupError.textContent = "Lỗi mã hóa: " + err.message;
+                setupError.textContent = "Lỗi tạo két: " + err.message;
                 setupError.classList.remove('hidden');
             }
         }
