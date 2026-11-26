@@ -2,30 +2,32 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quản Lý PassWord</title>
+  <title>Quản Lý Mật Khẩu — Zero-Knowledge Vault</title>
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
   <!-- MÀN HÌNH ĐĂNG NHẬP -->
   <div id="login-overlay" class="login-overlay">
     <div class="login-box glass-panel" style="position: relative;">
-      <!-- Nút Cài Đặt Github -->
-      <button id="btn-settings-open" class="icon-btn" style="position: absolute; top: 15px; right: 15px; font-size: 20px; color: var(--text-secondary);" title="Cấu hình Github API">⚙️</button>
+      <button id="btn-settings-open" class="icon-btn" style="position: absolute; top: 16px; right: 16px; font-size: 18px;" title="Cấu hình đồng bộ GitHub / Offline">⚙️</button>
 
       <h2 id="login-title">🔐 Mở Két Sắt</h2>
-      <p id="login-subtitle" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">Hệ thống mã hóa Zero-Knowledge</p>
-      
+      <p id="login-subtitle" style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 12px;">Mã hóa đầu cuối AES-256-GCM tại trình duyệt</p>
+      <div id="login-mode-badge" class="mode-badge offline">💾 Đang kiểm tra chế độ lưu...</div>
+
       <!-- Form Đăng nhập -->
       <form id="login-form">
+        <div id="vault-quick-chips" class="vault-quick-chips"></div>
+
         <div class="form-group">
-          <label>Tên Két Sắt (Vault Name)</label>
-          <input type="text" id="login-vault-name" list="available-vaults" required placeholder="VD: GiamDoc (Chọn hoặc Gõ mới)" autocomplete="off" />
+          <label for="login-vault-name">Tên Két Sắt (Vault Name)</label>
+          <input type="text" id="login-vault-name" list="available-vaults" required placeholder="VD: IT hoặc GiamDoc (Chọn hoặc gõ tên mới)" autocomplete="off" />
           <datalist id="available-vaults"></datalist>
         </div>
         <div class="form-group">
-          <label>Mật Khẩu</label>
+          <label for="login-password">Mật Khẩu Chủ (Master Password)</label>
           <div class="password-input-group">
             <input type="password" id="login-password" required placeholder="Nhập mật khẩu mở két" />
             <button type="button" class="icon-btn btn-toggle-pwd" title="Hiện/Ẩn MK">👁</button>
@@ -35,33 +37,33 @@
         <p id="login-error" class="error-text hidden"></p>
         <div class="modal-actions" style="margin-top: 20px;">
           <button type="button" id="btn-forgot" class="action-btn outline">(?) Gợi ý</button>
-          <button type="submit" id="btn-login-submit" class="action-btn primary">Mở Khóa</button>
+          <button type="submit" id="btn-login-submit" class="action-btn primary">🔓 Mở Khóa</button>
         </div>
       </form>
 
       <!-- Form Khởi tạo Két mới (Claim Vault) -->
       <form id="setup-form" class="hidden">
         <div class="setup-notice">
-          ⚠️ Két <strong id="setup-vault-name-display"></strong> chưa được kích hoạt.<br>Vui lòng thiết lập Master Password để làm chủ két sắt này.
+          ⚠️ Két <strong id="setup-vault-name-display"></strong> chưa tồn tại.<br>Thiết lập Master Password mới để khởi tạo két sắt riêng cho bộ phận/cá nhân này.
         </div>
         <div class="form-group">
-          <label>Master Password Mới</label>
+          <label for="setup-password">Master Password Mới</label>
           <div class="password-input-group">
-            <input type="password" id="setup-password" required placeholder="Gồm 8+ ký tự, chữ hoa, số..." />
+            <input type="password" id="setup-password" required placeholder="Tối thiểu 8 ký tự, chữ hoa, số..." />
             <button type="button" class="icon-btn btn-toggle-pwd" title="Hiện/Ẩn MK">👁</button>
           </div>
           <div id="pwd-strength" class="pwd-strength">Độ mạnh: <strong id="strength-label">Chưa nhập</strong></div>
         </div>
         <div class="form-group">
-          <label>Xác nhận Mật Khẩu</label>
+          <label for="setup-password-confirm">Xác nhận Mật Khẩu</label>
           <div class="password-input-group">
             <input type="password" id="setup-password-confirm" required placeholder="Nhập lại mật khẩu ở trên" />
             <button type="button" class="icon-btn btn-toggle-pwd" title="Hiện/Ẩn MK">👁</button>
           </div>
         </div>
         <div class="form-group">
-          <label>Gợi ý mật khẩu (Tùy chọn)</label>
-          <input type="text" id="setup-hint" placeholder="VD: Tên thú cưng + năm sinh" autocomplete="off" />
+          <label for="setup-hint">Gợi ý mật khẩu (Không bắt buộc)</label>
+          <input type="text" id="setup-hint" placeholder="VD: Câu gợi nhớ riêng (lưu dạng gợi ý không lộ MK)" autocomplete="off" />
         </div>
         <p id="setup-error" class="error-text hidden"></p>
         <div class="modal-actions" style="margin-top: 20px;">
@@ -70,21 +72,25 @@
         </div>
       </form>
 
-      <!-- Form Cài Đặt (Github API) -->
+      <!-- Form Cài Đặt (Github API / Offline) -->
       <form id="settings-form" class="hidden">
-        <h3 style="margin-bottom: 15px; text-align: center; color: var(--accent-color);">Cấu Hình Cloud (Github)</h3>
-        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">
-          Để đồng bộ Két Sắt lên Github, vui lòng cấu hình kho lưu trữ. Nếu bỏ trống, phần mềm sẽ lưu Offline.
+        <h3 style="margin-bottom: 10px; text-align: center; color: var(--accent-color);">Cấu Hình Đồng Bộ (GitHub / Offline)</h3>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+          Nhập Repo và Token GitHub để đồng bộ két sắt giữa nhiều thiết bị. Nếu để trống hoặc bấm <strong>Dùng Offline</strong>, phần mềm sẽ lưu két mã hóa ngay tại trình duyệt máy này.
         </p>
         <div class="form-group">
-          <label>Github Repo (VD: vng/quanly-mk)</label>
-          <input type="text" id="setting-repo" placeholder="Tên kho lưu trữ..." autocomplete="off" />
+          <label for="setting-repo">GitHub Repo (VD: hoangphuc-it/vault-store)</label>
+          <input type="text" id="setting-repo" placeholder="owner/repo" autocomplete="off" />
         </div>
         <div class="form-group">
-          <label>Github PAT (Personal Access Token)</label>
-          <input type="password" id="setting-token" placeholder="Mã Token (ghp_...)" autocomplete="off" />
+          <label for="setting-token">GitHub PAT (Personal Access Token)</label>
+          <div class="password-input-group">
+            <input type="password" id="setting-token" placeholder="github_pat_... hoặc ghp_..." autocomplete="off" />
+            <button type="button" class="icon-btn btn-toggle-pwd" title="Hiện/Ẩn Token">👁</button>
+          </div>
         </div>
-        <div class="modal-actions" style="margin-top: 20px;">
+        <div class="modal-actions" style="margin-top: 20px; flex-wrap: wrap;">
+          <button type="button" id="btn-clear-settings" class="action-btn outline" style="margin-right: auto;">💾 Dùng Offline</button>
           <button type="button" id="btn-cancel-settings" class="action-btn outline">Đóng</button>
           <button type="submit" id="btn-save-settings" class="action-btn primary">Lưu Cấu Hình</button>
         </div>
@@ -92,89 +98,256 @@
     </div>
   </div>
 
+  <!-- GIAO DIỆN CHÍNH SAU KHI MỞ KÉT -->
   <div id="app" class="app-layout hidden">
     <aside class="sidebar glass-panel">
-      <div class="sidebar-header">
-        <h2>DANH MỤC</h2>
+      <div class="sidebar-vault-box">
+        <div class="vault-identity">
+          <span class="vault-title" id="vault-badge-name">🔐 Két</span>
+          <span class="vault-sub-mode" id="vault-badge-mode">Offline</span>
+        </div>
+        <button id="btn-lock-vault" class="icon-btn lock-btn" title="Khóa két & đổi tài khoản ngay">🔒</button>
       </div>
+      <div class="auto-lock-bar">
+        <span>⏱ Tự khóa: <strong id="auto-lock-label">10:00</strong></span>
+      </div>
+
       <nav class="sidebar-nav">
-        <button class="nav-btn active" data-filter="passwords">🛡️ Mật khẩu & Tài khoản</button>
-        <button class="nav-btn" data-filter="notes">📝 Ghi chú bảo mật</button>
-        <button class="nav-btn" data-filter="favorites">⭐ Yêu thích</button>
-        <br><br>
-        <button class="nav-btn" data-filter="trash">🗑️ Thùng rác</button>
+        <button class="nav-btn active" data-filter="all">
+          <span>🛡️ Tất cả mục</span>
+          <span class="nav-count" id="count-all">0</span>
+        </button>
+        <button class="nav-btn" data-filter="passwords">
+          <span>🔑 Mật khẩu & Tài khoản</span>
+          <span class="nav-count" id="count-passwords">0</span>
+        </button>
+        <button class="nav-btn" data-filter="notes">
+          <span>📝 Ghi chú bảo mật</span>
+          <span class="nav-count" id="count-notes">0</span>
+        </button>
+        <button class="nav-btn" data-filter="favorites">
+          <span>⭐ Yêu thích</span>
+          <span class="nav-count" id="count-favorites">0</span>
+        </button>
+        <button class="nav-btn" data-filter="health">
+          <span>🩺 Kiểm tra MK</span>
+          <span class="nav-count warn" id="count-health">0</span>
+        </button>
+        <button class="nav-btn" data-filter="trash">
+          <span>🗑️ Thùng rác</span>
+          <span class="nav-count" id="count-trash">0</span>
+        </button>
       </nav>
+
       <div class="sidebar-footer">
-        <button id="btn-sync" class="action-btn outline">Đồng bộ</button>
+        <div id="sync-status-badge" class="sync-status-badge offline">
+          <span class="sync-dot"></span>
+          <span id="sync-status-text">Sẵn sàng</span>
+        </div>
+        <button id="btn-sync" class="action-btn outline full-btn">🔄 Đồng bộ ngay</button>
+        <div class="footer-mini-actions">
+          <button id="btn-change-master" class="mini-btn" title="Đổi mật khẩu chủ của két hiện tại">🗝️ Đổi MK Két</button>
+          <button id="btn-export-backup" class="mini-btn" title="Tải về file .enc đã mã hóa để dự phòng">💾 Xuất</button>
+          <button id="btn-import-backup" class="mini-btn" title="Nhập từ file backup .enc">📥 Nhập</button>
+          <input type="file" id="import-file-input" accept=".enc,.json" class="hidden" />
+        </div>
       </div>
     </aside>
 
     <main class="main-content">
       <header class="top-bar glass-panel">
         <div class="search-container">
-          <input type="text" id="search-input" placeholder="Tìm kiếm... (Phím tắt: /)" autocomplete="off" />
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Tìm nhóm, email, mã máy (arc-hp01), ghi chú 2FA... (Phím /)" autocomplete="off" />
+          <button type="button" id="btn-clear-search" class="clear-search-btn hidden" title="Xóa tìm kiếm">✕</button>
         </div>
+
         <div class="header-actions">
-          <button id="btn-toggle-view" class="action-btn outline" title="Chuyển đổi giao diện Bảng/Thẻ">📋 Dạng Bảng</button>
-          <button id="btn-add" class="action-btn primary">Thêm Mới (N)</button>
+          <div class="view-switcher">
+            <button id="btn-view-card" class="view-tab active" title="Xem dạng Thẻ bấm mở trực tiếp">🗂️ Dạng Thẻ</button>
+            <button id="btn-view-table" class="view-tab" title="Xem dạng Bảng kiểu Excel">📊 Dạng Bảng</button>
+          </div>
+          <button id="btn-expand-all" class="action-btn outline" title="Mở rộng hoặc thu gọn toàn bộ nhóm">📂 Mở hết</button>
+          <button id="btn-add" class="action-btn primary">+ Thêm Mới (N)</button>
         </div>
       </header>
 
+      <div id="category-bar" class="category-bar">
+        <button class="cat-chip active" data-cat="all">Tất cả</button>
+        <button class="cat-chip" data-cat="Email">📧 Email / Gmail</button>
+        <button class="cat-chip" data-cat="Server">🖥️ Server / NAS</button>
+        <button class="cat-chip" data-cat="Network">🌐 Mạng / VPN</button>
+        <button class="cat-chip" data-cat="API">🔑 API / Tool</button>
+        <button class="cat-chip" data-cat="Other">📦 Khác</button>
+      </div>
+
       <div class="items-list-container">
-        <div id="items-list" class="items-list">
-          <!-- Items will be rendered here -->
-        </div>
+        <div id="items-list" class="items-list"></div>
       </div>
     </main>
 
-    <!-- Modal Form (Hidden by default) -->
+    <!-- MODAL THÊM / SỬA MỤC -->
     <div id="item-modal" class="modal-overlay hidden">
-      <div class="modal-content glass-panel">
-        <h3 id="modal-title">Thêm Mới</h3>
+      <div class="modal-content modal-wide glass-panel">
+        <div class="modal-header-row">
+          <h3 id="modal-title">Thêm Mới</h3>
+          <button type="button" id="btn-close-item-modal" class="icon-btn" title="Đóng (Esc)">✕</button>
+        </div>
+
         <form id="item-form">
           <div class="form-group radio-group-box">
             <label><input type="radio" name="item-type" value="Account" checked> 🛡️ Nhóm Tài Khoản</label>
             <label><input type="radio" name="item-type" value="Note"> 📝 Ghi Chú / Code / Prompt</label>
           </div>
 
-          <div class="form-group">
-            <label for="item-name">Tiêu đề</label>
-            <input type="text" id="item-name" required autocomplete="off" />
-          </div>
-          <div class="form-group" id="group-url">
-            <label for="item-url">URL / Đường dẫn</label>
-            <input type="url" id="item-url" autocomplete="off" />
-          </div>
-          <div class="form-group">
-            <label for="item-notes">Nội dung (Ghi chú chung, Prompt, Code...)</label>
-            <textarea id="item-notes" rows="3" style="font-family: inherit;"></textarea>
-          </div>
-          
-          <div class="form-group" id="group-sub-accounts">
-            <label>Danh sách Tài khoản</label>
-            <div id="sub-accounts-container">
-              <!-- Render sub accounts inputs here -->
+          <div class="form-group-row">
+            <div class="form-group">
+              <label for="item-name">Tiêu đề nhóm / tên hệ thống</label>
+              <input type="text" id="item-name" required placeholder="VD: Gmail Nhân Sự Hoàng Phúc" autocomplete="off" />
             </div>
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-                <button type="button" id="btn-add-sub-account" class="action-btn outline" style="width: fit-content; font-size: 12px; padding: 4px 8px;">+ Thêm tài khoản</button>
-                <button type="button" id="btn-bulk-change-pwd" class="action-btn outline" style="width: fit-content; font-size: 12px; padding: 4px 8px; color: var(--accent-color); border-color: var(--accent-color);">🔄 Đổi MK hàng loạt</button>
+            <div class="form-group" id="group-category">
+              <label for="item-category">Phân loại</label>
+              <select id="item-category">
+                <option value="Email">📧 Email / Gmail</option>
+                <option value="Server">🖥️ Server / NAS / DB</option>
+                <option value="Network">🌐 Mạng / VPN / Firewall</option>
+                <option value="API">🔑 API / Tool / License</option>
+                <option value="Other">📦 Khác</option>
+              </select>
             </div>
           </div>
 
-          <div id="history-section" class="form-group hidden">
-            <label>Lịch sử thay đổi mật khẩu (10 lần gần nhất mỗi tài khoản)</label>
-            <div id="password-history-list" class="history-list">
-              <!-- Render history here -->
+          <div class="form-group" id="group-url">
+            <label for="item-url">URL / Địa chỉ đăng nhập</label>
+            <div class="password-input-group">
+              <input type="text" id="item-url" placeholder="VD: https://mail.google.com hoặc 192.168.20.20" autocomplete="off" />
+              <button type="button" id="btn-open-item-url" class="icon-btn" title="Mở trang web trong tab mới">🔗</button>
             </div>
           </div>
+
+          <div class="form-group">
+            <label for="item-notes">Ghi chú chung / Prompt / Code</label>
+            <textarea id="item-notes" rows="3" placeholder="Thông tin chung, hướng dẫn khôi phục, script..."></textarea>
+          </div>
+
+          <div class="form-group" id="group-sub-accounts">
+            <div class="sub-header-bar">
+              <label style="margin: 0;">Danh sách Tài khoản trong nhóm</label>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" id="btn-add-sub-account" class="action-btn outline small-btn">+ Thêm dòng</button>
+                <button type="button" id="btn-bulk-change-pwd" class="action-btn outline small-btn accent-btn">🔄 Đổi MK hàng loạt</button>
+              </div>
+            </div>
+            <div id="sub-accounts-container" class="sub-accounts-container"></div>
+          </div>
+
+          <div id="history-section" class="form-group hidden">
+            <div class="sub-header-bar">
+              <label style="margin: 0;">Lịch sử đổi mật khẩu (tối đa 10 lần gần nhất / tài khoản)</label>
+              <button type="button" id="btn-toggle-history-vis" class="mini-btn">👁 Hiện tất cả</button>
+            </div>
+            <div id="password-history-list" class="history-list"></div>
+          </div>
+
           <div class="modal-actions">
             <button type="button" id="btn-cancel" class="action-btn outline">Hủy</button>
-            <button type="submit" class="action-btn primary">Lưu lại</button>
+            <button type="submit" id="btn-save-item" class="action-btn primary">💾 Lưu lại</button>
           </div>
         </form>
       </div>
     </div>
-    
+
+    <!-- MODAL ĐỔI MẬT KHẨU HÀNG LOẠT -->
+    <div id="bulk-pwd-modal" class="modal-overlay hidden">
+      <div class="modal-content glass-panel" style="width: 560px;">
+        <div class="modal-header-row">
+          <h3>🔄 Đổi Mật Khẩu Hàng Loạt</h3>
+          <button type="button" id="btn-bulk-close" class="icon-btn">✕</button>
+        </div>
+        <div class="form-group">
+          <label for="bulk-pwd-input">Mật khẩu mới sẽ áp dụng</label>
+          <div class="password-input-group">
+            <input type="password" id="bulk-pwd-input" placeholder="Nhập hoặc bấm 🎲 để tự sinh mật khẩu mạnh" />
+            <button type="button" id="btn-bulk-gen-pwd" class="icon-btn" title="Tự sinh mật khẩu mạnh ngẫu nhiên">🎲</button>
+            <button type="button" id="btn-bulk-eye" class="icon-btn" title="Hiện/Ẩn MK">👁</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="sub-header-bar">
+            <label style="margin: 0;">Chọn tài khoản áp dụng:</label>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" id="btn-bulk-select-all" class="mini-btn">Chọn hết</button>
+              <button type="button" id="btn-bulk-select-none" class="mini-btn">Bỏ chọn</button>
+            </div>
+          </div>
+          <div id="bulk-scope-list" class="bulk-scope-list"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-bulk-cancel" class="action-btn outline">Hủy</button>
+          <button type="button" id="btn-bulk-apply" class="action-btn primary">Áp dụng vào danh sách</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL ĐỔI MASTER PASSWORD -->
+    <div id="master-pwd-modal" class="modal-overlay hidden">
+      <div class="modal-content glass-panel" style="width: 440px;">
+        <div class="modal-header-row">
+          <h3>🗝️ Đổi Mật Khẩu Chủ (Master Password)</h3>
+          <button type="button" id="btn-mp-close" class="icon-btn">✕</button>
+        </div>
+        <form id="master-pwd-form">
+          <div class="form-group">
+            <label for="mp-old">Mật khẩu hiện tại</label>
+            <input type="password" id="mp-old" required />
+          </div>
+          <div class="form-group">
+            <label for="mp-new">Mật khẩu chủ mới (tối thiểu 8 ký tự)</label>
+            <input type="password" id="mp-new" required minlength="8" />
+          </div>
+          <div class="form-group">
+            <label for="mp-confirm">Xác nhận mật khẩu chủ mới</label>
+            <input type="password" id="mp-confirm" required minlength="8" />
+          </div>
+          <div class="form-group">
+            <label for="mp-hint">Gợi ý mật khẩu mới</label>
+            <input type="text" id="mp-hint" autocomplete="off" />
+          </div>
+          <p id="mp-error" class="error-text hidden"></p>
+          <div class="modal-actions">
+            <button type="button" id="btn-mp-cancel" class="action-btn outline">Hủy</button>
+            <button type="submit" id="btn-mp-submit" class="action-btn primary">Mã Hóa Lại & Lưu</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL NHẬP BACKUP -->
+    <div id="import-modal" class="modal-overlay hidden">
+      <div class="modal-content glass-panel" style="width: 460px;">
+        <div class="modal-header-row">
+          <h3>📥 Nhập Dữ Liệu Từ Backup (.enc)</h3>
+          <button type="button" id="btn-imp-close" class="icon-btn">✕</button>
+        </div>
+        <form id="import-form">
+          <p id="imp-file-label" style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;"></p>
+          <div class="form-group">
+            <label for="imp-pwd">Mật khẩu của file backup này</label>
+            <input type="password" id="imp-pwd" required placeholder="Nhập Master Password của file backup" />
+          </div>
+          <div class="form-group radio-group-box">
+            <label><input type="radio" name="import-mode" value="merge" checked> ➕ Gộp thêm (Giữ mục cũ)</label>
+            <label><input type="radio" name="import-mode" value="replace"> ♻️ Thay thế toàn bộ két</label>
+          </div>
+          <p id="imp-error" class="error-text hidden"></p>
+          <div class="modal-actions">
+            <button type="button" id="btn-imp-cancel" class="action-btn outline">Hủy</button>
+            <button type="submit" id="btn-imp-submit" class="action-btn primary">Giải Mã & Nhập</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Notification Toast -->
     <div id="toast" class="toast hidden"></div>
   </div>
